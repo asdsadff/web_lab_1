@@ -18,6 +18,18 @@ public class Movie {
     private String genre;
     private LocalDate releaseDate;
     private Duration duration;
-    private Long directorId;
+    private Director director;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Movie movie = (Movie) o;
+        return Objects.equals(title, movie.title) && Objects.equals(genre, movie.genre) && Objects.equals(releaseDate, movie.releaseDate) && Objects.equals(duration, movie.duration) && Objects.equals(director, movie.director);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, genre, releaseDate, duration, director);
+    }
 }

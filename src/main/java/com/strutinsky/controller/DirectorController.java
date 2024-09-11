@@ -63,6 +63,25 @@ public class DirectorController {
                             +deletedDirector.getId());
         } catch (DirectorAlreadyExistException er) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(er.getMessage());
+        } catch (NoSuchDirectorException er) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er.getMessage());
+        }
+    }
+    @PutMapping("api/directors/{id}")
+    public ResponseEntity<?> updateDirector(@RequestBody Director director, @PathVariable("id") long id) {
+        try {
+            Director updatedDirector = directorService.updateDirector(director, id);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Director " +
+                            updatedDirector.getFirstName() +
+                            " " +
+                            updatedDirector.getLastName() +
+                            " has been updated with id: " +
+                            updatedDirector.getId());
+        } catch (DirectorAlreadyExistException er) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(er.getMessage());
+        } catch (NoSuchDirectorException er) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er.getMessage());
         }
     }
 }

@@ -1,17 +1,13 @@
 package com.strutinsky.controller;
 
-import com.strutinsky.exception.DirectorAlreadyExistException;
 import com.strutinsky.exception.MovieAlreadyExistException;
-import com.strutinsky.model.Director;
+import com.strutinsky.exception.NoSuchMovieException;
 import com.strutinsky.model.Movie;
 import com.strutinsky.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,17 +21,62 @@ public class MovieController {
     }
 
     @GetMapping("api/movies")
-    public List<Movie> getAllDirectors() {
+    public List<Movie> getAllMovies() {
         return movieService.getAllMovies();
     }
 
     @PostMapping("api/movies")
-    public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
+    public ResponseEntity<?> createMovie(@RequestBody Movie movie) {
         try {
-            Movie createMovie = movieService.createMovie(movie);
-            return new ResponseEntity<>(createMovie, HttpStatus.CREATED);
-        } catch (MovieAlreadyExistException re) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            Movie createdMovie = movieService.createMovie(movie);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("Movie " +
+                            createdMovie.getTitle() +
+                            " with genre " +
+                            createdMovie.getGenre() +
+                            " has been created with id: " +
+                            createdMovie.getId());
+        } catch (MovieAlreadyExistException er) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(er.getMessage());
+        }
+    }
+    @GetMapping("api/movies/{id}")
+    public ResponseEntity<?> getMovieById(@PathVariable("id") long id) {
+        try {
+            Movie movie = movieService.getMovieById(id);
+            return ResponseEntity.status(HttpStatus.FOUND).body(movie);
+        } catch (NoSuchMovieException er) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er.getMessage());
+        }
+    }
+    @DeleteMapping("api/movies/{id}")
+    public ResponseEntity<?> deleteMovie(@PathVariable("id") long id) {
+        try {
+            Movie deletedMovie = movieService.deleteMovie(id);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body("Movie " +
+                            deletedMovie.getTitle() +
+                            " with genre " +
+                            deletedMovie.getGenre() +
+                            " has been deleted with id: " +
+                            deletedMovie.getId());
+        } catch (MovieAlreadyExistException er) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(er.getMessage());
+        } catch (NoSuchMovieException er) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er.getMessage());
+        }
+    }
+
+    @PutMapping("api/movies/{id}")
+    public ResponseEntity<?> updateMovie(@RequestBody Movie movie, @PathVariable("id") long id) {
+        System.out.println(movie.getTitle());
+        try {
+            Movie updatedMovie = movieService.updateMovie(movie, id);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedMovie);
+        } catch (MovieAlreadyExistException er) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(er.getMessage());
+        } catch (NoSuchMovieException er) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(er.getMessage());
         }
     }
 }
